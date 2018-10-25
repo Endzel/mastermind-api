@@ -25,6 +25,21 @@ STATIC_ROOT = os.path.join(BASE_DIR, "static/")
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'mastermind',
+        'USER': 'root',
+        'PASSWORD': 'root',
+        'HOST': 'localhost',
+        'PORT': '3306',
+        'OPTIONS': {
+            'init_command': "SET sql_mode='STRICT_TRANS_TABLES'"
+        },
+    }
+}
+
+
 ALLOWED_HOSTS = ['127.0.0.1', '127.0.0.1:8000', 'localhost', 'localhost:8000', ]
 APPEND_SLASH = False
 

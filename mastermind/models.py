@@ -2,6 +2,8 @@ from django.db import models
 from django.utils.translation import ugettext_lazy as _
 from django.contrib.auth.models import BaseUserManager, AbstractBaseUser, PermissionsMixin
 
+from mastermind.choices import colours, feedbacks
+
 
 class CustomUserManager(BaseUserManager):
     def create(self, email, password, **extra_fields):
@@ -35,63 +37,52 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
         verbose_name = 'User'
         verbose_name_plural = 'Users'
 
-    first_name = models.CharField(null=True, blank=True, max_length=140, verbose_name=_('First name'))
-    last_name = models.CharField(null=True, blank=True, max_length=140, verbose_name=_('Last name'))
+    alias = models.CharField(null=True, blank=True, max_length=140, verbose_name=_('Alias'))
     email = models.EmailField(unique=True, verbose_name=_('Email'))
-    birth_date = models.DateField(null=True, blank=True, verbose_name=('Birth date'))
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
     objects = CustomUserManager()
     USERNAME_FIELD = 'email'
 
     def __str__(self):
+        return self.alias
+
+    def get_email(self):
         return self.email
 
-    def get_full_name(self):
-        return self.first_name + ' ' + self.last_name
+
+class Game(models.Model):
+
+    limit_guesses = models.PositiveSmallIntegerField(default=15, null=True, blank=True, verbose_name=_('Limit guesses'))
+    tries = models.PositiveSmallIntegerField(default=0, verbose_name=_('Total tries'))
+    completed = models.BooleanField(default=False)
+
+    # Relations
+    secret_code = models.ForeignKey('Code', null=True, on_delete=models.SET_NULL, related_name='secret_code_game', verbose_name=_('Secret code'))
+    codemaker = models.ForeignKey('CustomUser', null=True, on_delete=models.SET_NULL, related_name='codemaker_game', verbose_name=_('Code Maker'))
+    codebreaker = models.ForeignKey('CustomUser', null=True, on_delete=models.SET_NULL, related_name='codebreaker_game', verbose_name=_('Code Breaker'))
 
 
-# class Item(models.Model):
-#
-#     name = models.CharField(blank=True, max_length=140, verbose_name=_('Name'))
-#     description = models.TextField(blank=True, max_length=1000, verbose_name=_('Description'))
-#     country = models.CharField(blank=True, max_length=140, verbose_name=_('Country'))
-#     city = models.CharField(blank=True, max_length=140, verbose_name=_('City'))
-#
-#     # Relations
-#     types = models.ManyToManyField('ItemType', blank=True, verbose_name=_('Types'))
-#
-#     def __str__(self):
-#         return str(self.name)
-#
-#
-# class ItemType(models.Model):
-#
-#     name = models.CharField(blank=True, max_length=140, verbose_name=_('Name'))
-#
-#     def __str__(self):
-#         return str(self.name)
-#
-#
-# class Group(models.Model):
-#
-#     title = models.CharField(blank=True, max_length=140, verbose_name=_('Title'))
-#     description = models.TextField(blank=True, max_length=1000, verbose_name=_('Description'))
-#
-#     # Relations
-#     preferences = models.ManyToManyField('ItemType', blank=True, verbose_name=_('Preferences'))
-#     valorations = models.ManyToManyField('Valoration', blank=True, verbose_name=_('Valorations'))
-#     users = models.ManyToManyField('CustomUser', blank=True, verbose_name=_('Users'))
-#
-#     def __str__(self):
-#         return str(self.title)
-#
-#
-# class Valoration(models.Model):
-#
-#     comment = models.TextField(blank=True, max_length=1000, verbose_name=_('Comment'))
-#     score = models.IntegerField(default=0, verbose_name=_('Score'))
-#     item = models.ForeignKey('Item', on_delete=models.CASCADE, related_name='valorated_item', verbose_name=_('Valorated item'))
-#
-#     def __str__(self):
-#         return str(self.id)
+class Play(models.Model):
+
+    # Relations
+    feedback = models.ForeignKey('Feedback', on_delete=models.CASCADE, related_name='feedback_play', verbose_name=_('Feedback received'))
+    code = models.ForeignKey('Code', on_delete=models.CASCADE, related_name='played_code', verbose_name=_('Secret code'))
+    user = models.ForeignKey('CustomUser', on_delete=models.CASCADE, related_name='user_play', verbose_name=_('Player'))
+
+
+class Code(models.Model):
+
+    # Positional codes
+    first = models.CharField(choices=colours, blank=True, max_length=140, verbose_name=_('First'))
+    second = models.CharField(choices=colours, blank=True, max_length=140, verbose_name=_('Second'))
+    third = models.CharField(choices=colours, blank=True, max_length=140, verbose_name=_('Third'))
+    fourth = models.CharField(choices=colours, blank=True, max_length=140, verbose_name=_('Fourth'))
+
+
+class Feedback(models.Model):
+
+    first_feedback = models.CharField(choices=feedbacks, default='wrong', max_length=140, verbose_name=_('First feedback'))
+    second_feedback = models.CharField(choices=feedbacks, default='wrong', max_length=140, verbose_name=_('Second feedback'))
+    third_feedback = models.CharField(choices=feedbacks, default='wrong', max_length=140, verbose_name=_('Third feedback'))
+    fourth_feedback = models.CharField(choices=feedbacks, default='wrong', max_length=140, verbose_name=_('Fourth feedback'))

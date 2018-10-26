@@ -20,6 +20,6 @@ introducing the email, and the password twice to create it gracefully.
 
 To run the server (and, therefore, being able to play the game and access the admin pages) you will need to execute:
 `python manage.py runserver`
-
+The server will be available locally, but you can modify settings/base.py in order to change the deployment parameters.
 
 Instructions for playing will be available very soon!

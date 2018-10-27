@@ -3,7 +3,6 @@ from rest_framework import serializers
 from mastermind.models import Play, Game, Code, Feedback, CustomUser
 
 
-
 class CreateUserSerializer(serializers.ModelSerializer):
 
     class Meta:
@@ -55,10 +54,11 @@ class CreateGameSerializer(serializers.ModelSerializer):
 
     secret_code = CodeSerializer(required=True)
     codebreaker = serializers.CharField(required=True)
+    id = serializers.IntegerField(required=False, read_only=True)
 
     class Meta:
         model = Game
-        fields = ('codebreaker', 'secret_code',)
+        fields = ('id', 'codebreaker', 'secret_code',)
 
     def create(self, validated_data):
         code_data = validated_data.pop('secret_code')

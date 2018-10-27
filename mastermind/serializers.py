@@ -11,6 +11,13 @@ class CodeSerializer(serializers.ModelSerializer):
         exclude = ('id',)
 
 
+class SecretCodeSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Code
+        exclude = ('id',)
+
+
 class FeedbackSerializer(serializers.ModelSerializer):
 
     class Meta:
@@ -39,11 +46,16 @@ class GameHistorySerializer(serializers.ModelSerializer):
 
 class CreateGameSerializer(serializers.ModelSerializer):
 
+    secret_code = CodeSerializer(required=True)
+
     class Meta:
         model = Game
         fields = ('codebreaker', 'secret_code',)
 
     def create(self, validated_data):
-        validated_data['codemaker']: self.request.user
+        code_data = validated_data.pop('secret_code')
+        secret_code = CodeSerializer.create(CodeSerializer(), validated_data=code_data)
+        validated_data['codemaker'] = self.context['request'].user
+        validated_data['secret_code'] = secret_code
         game = Game.objects.create(**validated_data)
         return game

@@ -75,9 +75,12 @@ class Game(models.Model):
     completed = models.BooleanField(default=False)
 
     # Relations
-    secret_code = models.ForeignKey('Code', null=True, on_delete=models.SET_NULL, related_name='secret_code_game', verbose_name=_('Secret code'))
-    codemaker = models.ForeignKey('CustomUser', null=True, on_delete=models.SET_NULL, related_name='codemaker_game', verbose_name=_('Code Maker'))
-    codebreaker = models.ForeignKey('CustomUser', null=True, on_delete=models.SET_NULL, related_name='codebreaker_game', verbose_name=_('Code Breaker'))
+    secret_code = models.ForeignKey('Code', on_delete=models.CASCADE, related_name='secret_code_game', verbose_name=_('Secret code'))
+    codemaker = models.ForeignKey('CustomUser', on_delete=models.CASCADE, related_name='codemaker_game', verbose_name=_('Code Maker'))
+    codebreaker = models.ForeignKey('CustomUser', on_delete=models.CASCADE, related_name='codebreaker_game', verbose_name=_('Code Breaker'))
+
+    def __str__(self):
+        return str(self.id)
 
     def get_all_plays(self):
         return Play.objects.filter(game=self)
@@ -91,6 +94,9 @@ class Play(models.Model):
     code = models.ForeignKey('Code', on_delete=models.CASCADE, related_name='played_code', verbose_name=_('Secret code'))
     user = models.ForeignKey('CustomUser', on_delete=models.CASCADE, related_name='user_play', verbose_name=_('Player'))
 
+    def __str__(self):
+        return str(self.id)
+
 
 class Code(models.Model):
 
@@ -100,6 +106,9 @@ class Code(models.Model):
     third = models.CharField(choices=colours, blank=True, max_length=140, verbose_name=_('Third'))
     fourth = models.CharField(choices=colours, blank=True, max_length=140, verbose_name=_('Fourth'))
 
+    def __str__(self):
+        return self.first + ' ' + self.second + ' ' + self.third + ' ' + self.fourth
+
 
 class Feedback(models.Model):
 
@@ -108,7 +117,10 @@ class Feedback(models.Model):
     third = models.CharField(choices=feedbacks, default='wrong', max_length=140, verbose_name=_('Third feedback'))
     fourth = models.CharField(choices=feedbacks, default='wrong', max_length=140, verbose_name=_('Fourth feedback'))
 
-    def is_all_white(self):
-        if self.first == "white" and self.second == "white" and self.third == "white" and self.fourth == "white":
+    def __str__(self):
+        return self.first + ' ' + self.second + ' ' + self.third + ' ' + self.fourth
+
+    def is_all_black(self):
+        if self.first == "black" and self.second == "black" and self.third == "black" and self.fourth == "black":
             return True
         return False

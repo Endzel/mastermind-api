@@ -18,3 +18,7 @@ class CustomUserAdmin(admin.ModelAdmin):
 
 
 admin.site.register(CustomUser, CustomUserAdmin)
+admin.site.register(Game)
+admin.site.register(Play)
+admin.site.register(Code)
+admin.site.register(Feedback)

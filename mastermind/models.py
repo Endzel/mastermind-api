@@ -1,8 +1,19 @@
 from django.db import models
+from django.conf import settings
 from django.utils.translation import ugettext_lazy as _
 from django.contrib.auth.models import BaseUserManager, AbstractBaseUser, PermissionsMixin
+from django.dispatch import receiver
+
+from rest_framework.authtoken.models import Token
 
 from mastermind.choices import colours, feedbacks
+
+
+# Create user token automatically
+@receiver(models.signals.post_save, sender=settings.AUTH_USER_MODEL)
+def create_auth_token(sender, instance=None, created=False, **kwargs):
+    if created:
+        Token.objects.create(user=instance)
 
 
 class CustomUserManager(BaseUserManager):
@@ -45,7 +56,7 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     USERNAME_FIELD = 'email'
 
     def __str__(self):
-        return self.alias
+        return self.email
 
     def get_email(self):
         return self.email
@@ -67,6 +78,9 @@ class Game(models.Model):
     secret_code = models.ForeignKey('Code', null=True, on_delete=models.SET_NULL, related_name='secret_code_game', verbose_name=_('Secret code'))
     codemaker = models.ForeignKey('CustomUser', null=True, on_delete=models.SET_NULL, related_name='codemaker_game', verbose_name=_('Code Maker'))
     codebreaker = models.ForeignKey('CustomUser', null=True, on_delete=models.SET_NULL, related_name='codebreaker_game', verbose_name=_('Code Breaker'))
+
+    def get_all_plays(self):
+        return Play.objects.filter(game=self)
 
 
 class Play(models.Model):

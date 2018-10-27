@@ -25,4 +25,25 @@ class PlaySerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Play
-        fields = ('id', 'user', 'game', 'code', 'serializer',)
+        fields = ('id', 'user', 'game', 'code', 'feedback',)
+
+
+class GameHistorySerializer(serializers.ModelSerializer):
+
+    plays = PlaySerializer(required=False, many=True, source="get_all_plays")
+
+    class Meta:
+        model = Game
+        fields = ('id', 'codebreaker', 'codemaker', 'plays',)
+
+
+class GameCreateSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Game
+        fields = ('codebreaker', 'secret_code',)
+
+    def create(self, validated_data):
+        validated_data['codemaker']: self.request.user
+        game = Game.objects.create(**validated_data)
+        return game

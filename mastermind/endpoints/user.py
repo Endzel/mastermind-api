@@ -6,7 +6,7 @@ from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 
 
-class RetrieveToken(generics.GenericAPIView):
+class RetrieveTokenView(generics.GenericAPIView):
 
     permission_classes = (AllowAny,)
 

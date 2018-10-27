@@ -6,23 +6,27 @@ from mastermind.mixins import PlayMixin
 from mastermind.serializers import CreateGameSerializer, GameHistorySerializer
 
 
-class GameView(mixins.ListModelMixin,
-            mixins.CreateModelMixin,
+class GameView(mixins.CreateModelMixin,
             generics.GenericAPIView):
 
     permission_classes = (IsAuthenticated,)
     queryset = Game.objects.all()
-
-    def get_serializer_class(self):
-        if self.request.method == 'POST':
-            return CreateGameSerializer
-        return GameHistorySerializer
-
-    def get(self, request, *args, **kwargs):
-        return self.list(request, *args, **kwargs)
+    serializer_class = CreateGameSerializer
 
     def post(self, request, *args, **kwargs):
         return self.create(request, *args, **kwargs)
+
+
+class SingleGameView(mixins.RetrieveModelMixin,
+            generics.GenericAPIView):
+
+    permission_classes = (IsAuthenticated,)
+    queryset = Game.objects.all()
+    serializer_class = GameHistorySerializer
+    lookup_field = 'pk'
+
+    def get(self, request, *args, **kwargs):
+        return self.retrieve(request, *args, **kwargs)
 
 
 class PlayView(PlayMixin,

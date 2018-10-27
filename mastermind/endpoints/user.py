@@ -1,12 +1,12 @@
-from django.contrib.auth import logout, login, authenticate
-from mastermind.models import CustomUser
-from rest_framework import status, generics, mixins
+from django.contrib.auth import login, authenticate
+
+from rest_framework import status, generics
 from rest_framework.authtoken.models import Token
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 
 
-class Login(generics.GenericAPIView):
+class RetrieveToken(generics.GenericAPIView):
 
     permission_classes = (AllowAny,)
 
@@ -17,13 +17,3 @@ class Login(generics.GenericAPIView):
         login(request, user)
         token = Token.objects.get(user=user)
         return Response({"token": token.key}, status=status.HTTP_200_OK)
-
-
-class Logout(mixins.RetrieveModelMixin,
-             generics.GenericAPIView):
-
-    permission_classes = (AllowAny,)
-
-    def get(self, request, *args, **kwargs):
-        logout(request)
-        return Response({"success": "User logged out successfully"}, status=status.HTTP_200_OK)

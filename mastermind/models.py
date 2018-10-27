@@ -11,7 +11,7 @@ class CustomUserManager(BaseUserManager):
 
     def create_user(self, email, password, **extra_fields):
         if not email:
-            raise ValueError('You should include an email')
+            raise ValueError('You must include an email')
         email = self.normalize_email(email)
         user = self.model(email=email, **extra_fields)
         user.set_password(password)
@@ -50,6 +50,12 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     def get_email(self):
         return self.email
 
+    def get_codemaker_games(self):
+        return Game.objects.filter(codemaker=self)
+
+    def get_codebreaker_games(self):
+        return Game.objects.filter(codebreaker=self)
+
 
 class Game(models.Model):
 
@@ -66,6 +72,7 @@ class Game(models.Model):
 class Play(models.Model):
 
     # Relations
+    game = models.ForeignKey('Game', on_delete=models.CASCADE, related_name='game_play', verbose_name=_('Related game'))
     feedback = models.ForeignKey('Feedback', on_delete=models.CASCADE, related_name='feedback_play', verbose_name=_('Feedback received'))
     code = models.ForeignKey('Code', on_delete=models.CASCADE, related_name='played_code', verbose_name=_('Secret code'))
     user = models.ForeignKey('CustomUser', on_delete=models.CASCADE, related_name='user_play', verbose_name=_('Player'))
@@ -82,7 +89,12 @@ class Code(models.Model):
 
 class Feedback(models.Model):
 
-    first_feedback = models.CharField(choices=feedbacks, default='wrong', max_length=140, verbose_name=_('First feedback'))
-    second_feedback = models.CharField(choices=feedbacks, default='wrong', max_length=140, verbose_name=_('Second feedback'))
-    third_feedback = models.CharField(choices=feedbacks, default='wrong', max_length=140, verbose_name=_('Third feedback'))
-    fourth_feedback = models.CharField(choices=feedbacks, default='wrong', max_length=140, verbose_name=_('Fourth feedback'))
+    first = models.CharField(choices=feedbacks, default='wrong', max_length=140, verbose_name=_('First feedback'))
+    second = models.CharField(choices=feedbacks, default='wrong', max_length=140, verbose_name=_('Second feedback'))
+    third = models.CharField(choices=feedbacks, default='wrong', max_length=140, verbose_name=_('Third feedback'))
+    fourth = models.CharField(choices=feedbacks, default='wrong', max_length=140, verbose_name=_('Fourth feedback'))
+
+    def is_all_white(self):
+        if self.first == "white" and self.second == "white" and self.third == "white" and self.fourth == "white":
+            return True
+        return False

@@ -6,7 +6,7 @@ from mastermind.mixins import PlayMixin
 from mastermind.serializers import CreateGameSerializer, GameHistorySerializer
 
 
-class GameView(mixins.CreateModelMixin,
+class CreateGameView(mixins.CreateModelMixin,
             generics.GenericAPIView):
 
     permission_classes = (IsAuthenticated,)

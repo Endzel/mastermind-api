@@ -37,7 +37,7 @@ class GameHistorySerializer(serializers.ModelSerializer):
         fields = ('id', 'codebreaker', 'codemaker', 'plays',)
 
 
-class GameCreateSerializer(serializers.ModelSerializer):
+class CreateGameSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Game

@@ -1,7 +1,14 @@
 from rest_framework import serializers
 
-from mastermind.models import Play, Game, Code, Feedback
+from mastermind.models import Play, Game, Code, Feedback, CustomUser
 
+
+
+class CreateUserSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = CustomUser
+        fields = ('alias', 'email', 'password')
 
 
 class CodeSerializer(serializers.ModelSerializer):
@@ -41,12 +48,13 @@ class GameHistorySerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Game
-        fields = ('id', 'codebreaker', 'codemaker', 'plays',)
+        fields = ('id', 'codebreaker', 'codemaker', 'plays', 'completed',)
 
 
 class CreateGameSerializer(serializers.ModelSerializer):
 
     secret_code = CodeSerializer(required=True)
+    codebreaker = serializers.CharField(required=True)
 
     class Meta:
         model = Game
@@ -54,8 +62,11 @@ class CreateGameSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         code_data = validated_data.pop('secret_code')
+        email = validated_data.pop('codebreaker')
+        codebreaker = CustomUser.objects.get(email=email)
         secret_code = CodeSerializer.create(CodeSerializer(), validated_data=code_data)
         validated_data['codemaker'] = self.context['request'].user
         validated_data['secret_code'] = secret_code
+        validated_data['codebreaker'] = codebreaker
         game = Game.objects.create(**validated_data)
         return game
